@@ -193,20 +193,34 @@ class _RewardCardState extends State<RewardCard> with SingleTickerProviderStateM
                                       offset: const Offset(0, 2),
                                     ),
                                   ],
-                                  image: widget.reward.imageUrl != null
-                                      ? DecorationImage(
-                                          image: NetworkImage(widget.reward.imageUrl!),
-                                          fit: BoxFit.cover,
-                                        )
-                                      : null,
                                 ),
-                                child: widget.reward.imageUrl == null
-                                    ? Icon(
+                                clipBehavior: Clip.antiAlias,
+                                child: widget.reward.imageUrl != null
+                                    ? widget.reward.imageUrl!.startsWith('http')
+                                        ? Image.network(
+                                            widget.reward.imageUrl!,
+                                            fit: BoxFit.cover,
+                                            width: 80,
+                                            height: 80,
+                                            errorBuilder: (context, error, stackTrace) {
+                                              return Icon(
+                                                Icons.card_giftcard,
+                                                size: 32, 
+                                                color: _cardColors[0],
+                                              );
+                                            },
+                                          )
+                                        : Image.asset(
+                                            widget.reward.imageUrl!,
+                                            fit: BoxFit.cover,
+                                            width: 80,
+                                            height: 80,
+                                          )
+                                    : Icon(
                                         Icons.card_giftcard,
                                         size: 32,
                                         color: _cardColors[0],
-                                      )
-                                    : null,
+                                      ),
                               ),
                             ),
                             const SizedBox(width: 16),

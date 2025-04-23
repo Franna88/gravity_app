@@ -564,15 +564,22 @@ class _RewardDetailsScreenState extends State<RewardDetailsScreen> with TickerPr
                                   ).createShader(rect);
                                 },
                                 blendMode: BlendMode.darken,
-                                child: Image.network(
-                                  imageUrl,
-                                  height: 260,
-                                  width: double.infinity,
-                                  fit: BoxFit.cover,
-                                  errorBuilder: (context, error, stackTrace) {
-                                    return _buildDefaultImage();
-                                  },
-                                ),
+                                child: imageUrl.startsWith('http')
+                                    ? Image.network(
+                                        imageUrl,
+                                        height: 260,
+                                        width: double.infinity,
+                                        fit: BoxFit.cover,
+                                        errorBuilder: (context, error, stackTrace) {
+                                          return _buildDefaultImage();
+                                        },
+                                      )
+                                    : Image.asset(
+                                        imageUrl,
+                                        height: 260,
+                                        width: double.infinity,
+                                        fit: BoxFit.cover,
+                                      ),
                               ),
                             )
                           : _buildDefaultImage(),

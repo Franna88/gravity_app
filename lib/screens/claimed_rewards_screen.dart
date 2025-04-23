@@ -20,6 +20,7 @@ class _ClaimedRewardsScreenState extends State<ClaimedRewardsScreen> with Ticker
   final List<_ConfettiParticle> _particles = [];
   late AnimationController _confettiController;
   late AnimationController _slideController;
+  late AnimationController _pulseController;
   final math.Random _random = math.Random();
   int _highlightedIndex = -1;
 
@@ -38,6 +39,11 @@ class _ClaimedRewardsScreenState extends State<ClaimedRewardsScreen> with Ticker
       duration: const Duration(milliseconds: 1200),
       vsync: this,
     );
+    
+    _pulseController = AnimationController(
+      duration: const Duration(milliseconds: 2000),
+      vsync: this,
+    )..repeat(reverse: true);
     
     // Initialize some particles
     _initializeParticles();
@@ -153,6 +159,7 @@ class _ClaimedRewardsScreenState extends State<ClaimedRewardsScreen> with Ticker
   void dispose() {
     _confettiController.dispose();
     _slideController.dispose();
+    _pulseController.dispose();
     super.dispose();
   }
 
@@ -163,8 +170,23 @@ class _ClaimedRewardsScreenState extends State<ClaimedRewardsScreen> with Ticker
 
     return Scaffold(
       backgroundColor: AppColors.background,
+      extendBodyBehindAppBar: true,
       appBar: AppBar(
+        backgroundColor: Colors.transparent,
+        elevation: 0,
         title: const Text('Claimed Rewards'),
+        flexibleSpace: Container(
+          decoration: const BoxDecoration(
+            gradient: LinearGradient(
+              colors: [
+                AppColors.primary,
+                Color(0xFF7367F0),
+              ],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            ),
+          ),
+        ),
         actions: [
           IconButton(
             icon: const Icon(Icons.refresh),
@@ -174,7 +196,21 @@ class _ClaimedRewardsScreenState extends State<ClaimedRewardsScreen> with Ticker
       ),
       body: Stack(
         children: [
-          // Background decoration
+          // Background gradient
+          Container(
+            decoration: const BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+                colors: [
+                  Color(0xFFEEF1F8),
+                  Colors.white,
+                ],
+              ),
+            ),
+          ),
+          
+          // Decorative elements
           Positioned(
             top: -100,
             right: -50,
@@ -200,7 +236,7 @@ class _ClaimedRewardsScreenState extends State<ClaimedRewardsScreen> with Ticker
             ),
           ),
           
-          // Main content
+          // Main content with top padding for AppBar
           _isLoading
               ? const Center(child: CircularProgressIndicator())
               : redemptionHistory.isEmpty
@@ -227,372 +263,383 @@ class _ClaimedRewardsScreenState extends State<ClaimedRewardsScreen> with Ticker
   }
 
   Widget _buildEmptyState() {
-    return Center(
-      child: SingleChildScrollView(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            TweenAnimationBuilder<double>(
-              duration: const Duration(milliseconds: 1000),
-              curve: Curves.elasticOut,
-              tween: Tween<double>(begin: 0.5, end: 1.0),
-              builder: (context, value, child) {
-                return Transform.scale(
-                  scale: value,
-                  child: child,
-                );
-              },
-              child: Container(
-                padding: const EdgeInsets.all(20),
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: AppColors.primary.withOpacity(0.1),
-                ),
-                child: Icon(
-                  Icons.card_giftcard,
-                  size: 100,
-                  color: AppColors.primary.withOpacity(0.7),
-                ),
-              ),
-            ),
-            const SizedBox(height: 24),
-            FadeTransition(
-              opacity: Tween<double>(begin: 0, end: 1).animate(
-                CurvedAnimation(
-                  parent: _slideController,
-                  curve: const Interval(0.3, 1.0),
-                ),
-              ),
-              child: const Text(
-                'No Claimed Rewards Yet',
-                style: TextStyle(
-                  fontSize: 24,
-                  fontWeight: FontWeight.bold,
-                  color: AppColors.primary,
-                ),
-                textAlign: TextAlign.center,
-              ),
-            ),
-            const SizedBox(height: 16),
-            FadeTransition(
-              opacity: Tween<double>(begin: 0, end: 1).animate(
-                CurvedAnimation(
-                  parent: _slideController,
-                  curve: const Interval(0.5, 1.0),
-                ),
-              ),
-              child: Container(
-                margin: const EdgeInsets.symmetric(horizontal: 40),
-                padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(12),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withOpacity(0.05),
-                      blurRadius: 10,
-                      offset: const Offset(0, 4),
+    return Padding(
+      padding: EdgeInsets.only(top: MediaQuery.of(context).padding.top + kToolbarHeight),
+      child: Center(
+        child: SingleChildScrollView(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              AnimatedBuilder(
+                animation: _pulseController,
+                builder: (context, child) {
+                  return Transform.scale(
+                    scale: 1.0 + 0.1 * _pulseController.value,
+                    child: child,
+                  );
+                },
+                child: Container(
+                  padding: const EdgeInsets.all(24),
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    gradient: LinearGradient(
+                      colors: [
+                        AppColors.primary.withOpacity(0.2),
+                        AppColors.accent.withOpacity(0.2),
+                      ],
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
                     ),
-                  ],
+                  ),
+                  child: Icon(
+                    Icons.card_giftcard,
+                    size: 100,
+                    color: AppColors.primary.withOpacity(0.7),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 24),
+              FadeTransition(
+                opacity: Tween<double>(begin: 0, end: 1).animate(
+                  CurvedAnimation(
+                    parent: _slideController,
+                    curve: const Interval(0.3, 1.0),
+                  ),
                 ),
                 child: const Text(
-                  'Redeem rewards from the rewards shop to see them here. Earn points by visiting Gravity Trampoline Park!',
+                  'No Claimed Rewards Yet',
                   style: TextStyle(
-                    fontSize: 16,
-                    color: AppColors.textSecondary,
-                    height: 1.5,
+                    fontSize: 24,
+                    fontWeight: FontWeight.bold,
+                    color: AppColors.primary,
                   ),
                   textAlign: TextAlign.center,
                 ),
               ),
-            ),
-            const SizedBox(height: 32),
-            SlideTransition(
-              position: Tween<Offset>(
-                begin: const Offset(0, 0.5),
-                end: Offset.zero,
-              ).animate(
-                CurvedAnimation(
-                  parent: _slideController,
-                  curve: const Interval(0.7, 1.0, curve: Curves.easeOutCubic),
+              const SizedBox(height: 16),
+              FadeTransition(
+                opacity: Tween<double>(begin: 0, end: 1).animate(
+                  CurvedAnimation(
+                    parent: _slideController,
+                    curve: const Interval(0.5, 1.0),
+                  ),
+                ),
+                child: Container(
+                  margin: const EdgeInsets.symmetric(horizontal: 40),
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(16),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.05),
+                        blurRadius: 10,
+                        offset: const Offset(0, 4),
+                      ),
+                    ],
+                  ),
+                  child: const Text(
+                    'Redeem rewards from the rewards shop to see them here. Earn points by visiting Gravity Trampoline Park!',
+                    style: TextStyle(
+                      fontSize: 16,
+                      color: AppColors.textSecondary,
+                      height: 1.5,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
                 ),
               ),
-              child: CustomButton(
-                text: 'Browse Rewards',
-                onPressed: () {
-                  Navigator.pushNamed(context, AppRoutes.rewardsShop);
-                },
-                width: 220,
-                icon: Icons.redeem,
+              const SizedBox(height: 32),
+              SlideTransition(
+                position: Tween<Offset>(
+                  begin: const Offset(0, 0.5),
+                  end: Offset.zero,
+                ).animate(
+                  CurvedAnimation(
+                    parent: _slideController,
+                    curve: const Interval(0.7, 1.0, curve: Curves.easeOutCubic),
+                  ),
+                ),
+                child: CustomButton(
+                  text: 'Browse Rewards',
+                  onPressed: () {
+                    Navigator.pushNamed(context, AppRoutes.rewardsShop);
+                  },
+                  width: 220,
+                  icon: Icons.redeem,
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
   }
 
   Widget _buildHistoryList(List<Map<String, dynamic>> history) {
-    return RefreshIndicator(
-      onRefresh: _loadRedemptionHistory,
-      child: ListView.builder(
-        padding: const EdgeInsets.all(16),
-        itemCount: history.length,
-        itemBuilder: (context, index) {
-          final reward = history[index];
-          final String rewardName = reward['rewardName'];
-          final DateTime timestamp = reward['timestamp'];
-          final int pointsSpent = reward['pointsSpent'];
-          final bool isExpired = reward['expiryDate'] != null && 
-                                reward['expiryDate'].isBefore(DateTime.now());
-          
-          return SlideTransition(
-            position: Tween<Offset>(
-              begin: const Offset(1, 0),
-              end: Offset.zero,
-            ).animate(
-              CurvedAnimation(
-                parent: _slideController,
-                curve: Interval(
-                  index * 0.1 > 0.9 ? 0.9 : index * 0.1,
-                  (index * 0.1 + 0.6) > 1.0 ? 1.0 : (index * 0.1 + 0.6),
-                  curve: Curves.easeOutCubic,
-                ),
-              ),
-            ),
-            child: FadeTransition(
-              opacity: Tween<double>(begin: 0, end: 1).animate(
+    return Padding(
+      padding: EdgeInsets.only(top: MediaQuery.of(context).padding.top + kToolbarHeight),
+      child: RefreshIndicator(
+        onRefresh: _loadRedemptionHistory,
+        child: ListView.builder(
+          padding: const EdgeInsets.all(16),
+          itemCount: history.length,
+          itemBuilder: (context, index) {
+            final reward = history[index];
+            final String rewardName = reward['rewardName'];
+            final DateTime timestamp = reward['timestamp'];
+            final int pointsSpent = reward['pointsSpent'];
+            final bool isExpired = reward['expiryDate'] != null && 
+                                  reward['expiryDate'].isBefore(DateTime.now());
+            
+            return SlideTransition(
+              position: Tween<Offset>(
+                begin: const Offset(1, 0),
+                end: Offset.zero,
+              ).animate(
                 CurvedAnimation(
                   parent: _slideController,
                   curve: Interval(
                     index * 0.1 > 0.9 ? 0.9 : index * 0.1,
                     (index * 0.1 + 0.6) > 1.0 ? 1.0 : (index * 0.1 + 0.6),
+                    curve: Curves.easeOutCubic,
                   ),
                 ),
               ),
-              child: GestureDetector(
-                onTap: !isExpired ? () => _playConfettiAnimation(index) : null,
-                child: AnimatedContainer(
-                  duration: const Duration(milliseconds: 300),
-                  margin: const EdgeInsets.only(bottom: 16),
-                  decoration: BoxDecoration(
-                    gradient: _highlightedIndex == index && !isExpired
-                        ? LinearGradient(
-                            colors: [
-                              AppColors.primary.withOpacity(0.9),
-                              AppColors.primary.withOpacity(0.7),
-                            ],
-                            begin: Alignment.topLeft,
-                            end: Alignment.bottomRight,
-                          )
-                        : null,
-                    color: _highlightedIndex != index ? Colors.white : null,
-                    borderRadius: BorderRadius.circular(16),
-                    boxShadow: [
-                      BoxShadow(
-                        color: _highlightedIndex == index && !isExpired
-                            ? AppColors.primary.withOpacity(0.3)
-                            : Colors.black.withOpacity(0.1),
-                        blurRadius: _highlightedIndex == index && !isExpired ? 10 : 5,
-                        offset: const Offset(0, 4),
-                      ),
-                    ],
+              child: FadeTransition(
+                opacity: Tween<double>(begin: 0, end: 1).animate(
+                  CurvedAnimation(
+                    parent: _slideController,
+                    curve: Interval(
+                      index * 0.1 > 0.9 ? 0.9 : index * 0.1,
+                      (index * 0.1 + 0.6) > 1.0 ? 1.0 : (index * 0.1 + 0.6),
+                    ),
                   ),
-                  child: Padding(
-                    padding: const EdgeInsets.all(20),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            TweenAnimationBuilder<double>(
-                              duration: const Duration(milliseconds: 500),
-                              tween: Tween<double>(
-                                begin: 1.0,
-                                end: _highlightedIndex == index && !isExpired ? 1.1 : 1.0,
-                              ),
-                              builder: (context, value, child) {
-                                return Transform.scale(
-                                  scale: value,
-                                  child: child,
-                                );
-                              },
-                              child: Container(
-                                padding: const EdgeInsets.all(16),
-                                decoration: BoxDecoration(
-                                  color: isExpired
-                                      ? Colors.grey[200]
-                                      : _highlightedIndex == index
-                                          ? Colors.white.withOpacity(0.3)
-                                          : AppColors.primary.withOpacity(0.1),
-                                  shape: BoxShape.circle,
-                                  boxShadow: _highlightedIndex == index && !isExpired
-                                      ? [
-                                          BoxShadow(
-                                            color: Colors.white.withOpacity(0.5),
-                                            blurRadius: 12,
-                                            spreadRadius: 2,
-                                          )
-                                        ]
-                                      : null,
+                ),
+                child: GestureDetector(
+                  onTap: !isExpired ? () => _playConfettiAnimation(index) : null,
+                  child: AnimatedContainer(
+                    duration: const Duration(milliseconds: 300),
+                    margin: const EdgeInsets.only(bottom: 16),
+                    decoration: BoxDecoration(
+                      gradient: _highlightedIndex == index && !isExpired
+                          ? LinearGradient(
+                              colors: [
+                                AppColors.primary.withOpacity(0.9),
+                                AppColors.primary.withOpacity(0.7),
+                              ],
+                              begin: Alignment.topLeft,
+                              end: Alignment.bottomRight,
+                            )
+                          : null,
+                      color: _highlightedIndex != index ? Colors.white : null,
+                      borderRadius: BorderRadius.circular(16),
+                      boxShadow: [
+                        BoxShadow(
+                          color: _highlightedIndex == index && !isExpired
+                              ? AppColors.primary.withOpacity(0.3)
+                              : Colors.black.withOpacity(0.1),
+                          blurRadius: _highlightedIndex == index && !isExpired ? 10 : 5,
+                          offset: const Offset(0, 4),
+                        ),
+                      ],
+                    ),
+                    child: Padding(
+                      padding: const EdgeInsets.all(20),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              TweenAnimationBuilder<double>(
+                                duration: const Duration(milliseconds: 500),
+                                tween: Tween<double>(
+                                  begin: 1.0,
+                                  end: _highlightedIndex == index && !isExpired ? 1.1 : 1.0,
                                 ),
-                                child: Icon(
-                                  _getIconForReward(rewardName),
-                                  color: isExpired
-                                      ? Colors.grey
-                                      : _highlightedIndex == index
-                                          ? AppColors.primary
-                                          : AppColors.primary,
-                                  size: 32,
+                                builder: (context, value, child) {
+                                  return Transform.scale(
+                                    scale: value,
+                                    child: child,
+                                  );
+                                },
+                                child: Container(
+                                  padding: const EdgeInsets.all(16),
+                                  decoration: BoxDecoration(
+                                    color: isExpired
+                                        ? Colors.grey[200]
+                                        : _highlightedIndex == index
+                                            ? Colors.white.withOpacity(0.3)
+                                            : AppColors.primary.withOpacity(0.1),
+                                    shape: BoxShape.circle,
+                                    boxShadow: _highlightedIndex == index && !isExpired
+                                        ? [
+                                            BoxShadow(
+                                              color: Colors.white.withOpacity(0.5),
+                                              blurRadius: 12,
+                                              spreadRadius: 2,
+                                            )
+                                          ]
+                                        : null,
+                                  ),
+                                  child: Icon(
+                                    _getIconForReward(rewardName),
+                                    color: isExpired
+                                        ? Colors.grey
+                                        : _highlightedIndex == index
+                                            ? AppColors.primary
+                                            : AppColors.primary,
+                                    size: 32,
+                                  ),
                                 ),
                               ),
-                            ),
-                            const SizedBox(width: 16),
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Row(
-                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                    children: [
-                                      Flexible(
-                                        child: Text(
-                                          rewardName,
-                                          style: TextStyle(
-                                            fontSize: 18,
-                                            fontWeight: FontWeight.bold,
-                                            color: isExpired
-                                                ? Colors.grey
-                                                : _highlightedIndex == index
-                                                    ? Colors.white
-                                                    : AppColors.textPrimary,
+                              const SizedBox(width: 16),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Row(
+                                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                      children: [
+                                        Flexible(
+                                          child: Text(
+                                            rewardName,
+                                            style: TextStyle(
+                                              fontSize: 18,
+                                              fontWeight: FontWeight.bold,
+                                              color: isExpired
+                                                  ? Colors.grey
+                                                  : _highlightedIndex == index
+                                                      ? Colors.white
+                                                      : AppColors.textPrimary,
+                                            ),
                                           ),
                                         ),
-                                      ),
-                                      Container(
-                                        padding: const EdgeInsets.symmetric(
-                                          horizontal: 10,
-                                          vertical: 6,
+                                        Container(
+                                          padding: const EdgeInsets.symmetric(
+                                            horizontal: 10,
+                                            vertical: 6,
+                                          ),
+                                          decoration: BoxDecoration(
+                                            color: _highlightedIndex == index && !isExpired
+                                                ? Colors.white.withOpacity(0.3)
+                                                : AppColors.accent.withOpacity(0.1),
+                                            borderRadius: BorderRadius.circular(12),
+                                          ),
+                                          child: Row(
+                                            mainAxisSize: MainAxisSize.min,
+                                            children: [
+                                              Icon(
+                                                Icons.stars_rounded,
+                                                size: 16,
+                                                color: _highlightedIndex == index && !isExpired
+                                                    ? Colors.white
+                                                    : AppColors.accent,
+                                              ),
+                                              const SizedBox(width: 4),
+                                              Text(
+                                                '$pointsSpent pts',
+                                                style: TextStyle(
+                                                  fontSize: 14,
+                                                  fontWeight: FontWeight.bold,
+                                                  color: _highlightedIndex == index && !isExpired
+                                                      ? Colors.white
+                                                      : AppColors.accent,
+                                                ),
+                                              ),
+                                            ],
+                                          ),
                                         ),
-                                        decoration: BoxDecoration(
+                                      ],
+                                    ),
+                                    const SizedBox(height: 8),
+                                    Row(
+                                      children: [
+                                        Icon(
+                                          Icons.calendar_today,
+                                          size: 14,
                                           color: _highlightedIndex == index && !isExpired
-                                              ? Colors.white.withOpacity(0.3)
-                                              : AppColors.accent.withOpacity(0.1),
-                                          borderRadius: BorderRadius.circular(12),
+                                              ? Colors.white.withOpacity(0.7)
+                                              : AppColors.textSecondary,
+                                        ),
+                                        const SizedBox(width: 6),
+                                        Text(
+                                          'Claimed on ${_formatDate(timestamp)}',
+                                          style: TextStyle(
+                                            fontSize: 14,
+                                            color: _highlightedIndex == index && !isExpired
+                                                ? Colors.white.withOpacity(0.9)
+                                                : AppColors.textSecondary,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                    const SizedBox(height: 8),
+                                    if (isExpired)
+                                      Container(
+                                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                                        decoration: BoxDecoration(
+                                          color: Colors.red[50],
+                                          borderRadius: BorderRadius.circular(4),
+                                          border: Border.all(color: Colors.red[200]!),
                                         ),
                                         child: Row(
                                           mainAxisSize: MainAxisSize.min,
                                           children: [
                                             Icon(
-                                              Icons.stars_rounded,
-                                              size: 16,
-                                              color: _highlightedIndex == index && !isExpired
-                                                  ? Colors.white
-                                                  : AppColors.accent,
+                                              Icons.warning_amber_rounded,
+                                              size: 14,
+                                              color: Colors.red[700],
                                             ),
                                             const SizedBox(width: 4),
                                             Text(
-                                              '$pointsSpent pts',
+                                              'Expired',
                                               style: TextStyle(
-                                                fontSize: 14,
+                                                fontSize: 12,
                                                 fontWeight: FontWeight.bold,
-                                                color: _highlightedIndex == index && !isExpired
-                                                    ? Colors.white
-                                                    : AppColors.accent,
+                                                color: Colors.red[700],
                                               ),
                                             ),
                                           ],
                                         ),
                                       ),
-                                    ],
-                                  ),
-                                  const SizedBox(height: 8),
-                                  Row(
-                                    children: [
-                                      Icon(
-                                        Icons.calendar_today,
-                                        size: 14,
-                                        color: _highlightedIndex == index && !isExpired
-                                            ? Colors.white.withOpacity(0.7)
-                                            : AppColors.textSecondary,
-                                      ),
-                                      const SizedBox(width: 6),
-                                      Text(
-                                        'Claimed on ${_formatDate(timestamp)}',
-                                        style: TextStyle(
-                                          fontSize: 14,
-                                          color: _highlightedIndex == index && !isExpired
-                                              ? Colors.white.withOpacity(0.9)
-                                              : AppColors.textSecondary,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                  const SizedBox(height: 8),
-                                  if (isExpired)
-                                    Container(
-                                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                                      decoration: BoxDecoration(
-                                        color: Colors.red[50],
-                                        borderRadius: BorderRadius.circular(4),
-                                        border: Border.all(color: Colors.red[200]!),
-                                      ),
-                                      child: Row(
-                                        mainAxisSize: MainAxisSize.min,
-                                        children: [
-                                          Icon(
-                                            Icons.warning_amber_rounded,
-                                            size: 14,
-                                            color: Colors.red[700],
-                                          ),
-                                          const SizedBox(width: 4),
-                                          Text(
-                                            'Expired',
-                                            style: TextStyle(
-                                              fontSize: 12,
-                                              fontWeight: FontWeight.bold,
-                                              color: Colors.red[700],
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                ],
+                                  ],
+                                ),
                               ),
+                            ],
+                          ),
+                          if (!isExpired) ...[
+                            const SizedBox(height: 16),
+                            Container(
+                              height: 1,
+                              color: _highlightedIndex == index
+                                  ? Colors.white.withOpacity(0.2)
+                                  : Colors.grey[200],
+                            ),
+                            const SizedBox(height: 16),
+                            CustomButton(
+                              text: _getActionButtonText(rewardName),
+                              onPressed: () => _navigateToExternalSite(rewardName),
+                              backgroundColor: _highlightedIndex == index
+                                  ? Colors.white
+                                  : null,
+                              textColor: _highlightedIndex == index
+                                  ? AppColors.primary
+                                  : null,
+                              isOutlined: _highlightedIndex != index,
+                              icon: _getActionIcon(rewardName),
                             ),
                           ],
-                        ),
-                        if (!isExpired) ...[
-                          const SizedBox(height: 16),
-                          Container(
-                            height: 1,
-                            color: _highlightedIndex == index
-                                ? Colors.white.withOpacity(0.2)
-                                : Colors.grey[200],
-                          ),
-                          const SizedBox(height: 16),
-                          CustomButton(
-                            text: _getActionButtonText(rewardName),
-                            onPressed: () => _navigateToExternalSite(rewardName),
-                            backgroundColor: _highlightedIndex == index
-                                ? Colors.white
-                                : null,
-                            textColor: _highlightedIndex == index
-                                ? AppColors.primary
-                                : null,
-                            isOutlined: _highlightedIndex != index,
-                            icon: _getActionIcon(rewardName),
-                          ),
                         ],
-                      ],
+                      ),
                     ),
                   ),
                 ),
               ),
-            ),
-          );
-        },
+            );
+          },
+        ),
       ),
     );
   }
