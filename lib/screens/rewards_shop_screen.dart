@@ -22,7 +22,8 @@ class _RewardsShopScreenState extends State<RewardsShopScreen> with SingleTicker
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 2, vsync: this);
+    // 6 tabs: All + 5 categories 
+    _tabController = TabController(length: 6, vsync: this);
     _loadRewards();
   }
 
@@ -81,6 +82,13 @@ class _RewardsShopScreenState extends State<RewardsShopScreen> with SingleTicker
     
     final rewardsUserCannotClaim = rewards.where((reward) => 
       reward.additionalInfo?['canRedeem'] != true).toList();
+      
+    // Get rewards for each category
+    final discountRewards = rewards.where((reward) => reward.category == RewardCategories.discounts).toList();
+    final freeJumpRewards = rewards.where((reward) => reward.category == RewardCategories.freeJumps).toList();
+    final merchandiseRewards = rewards.where((reward) => reward.category == RewardCategories.merchandise).toList();
+    final vipRewards = rewards.where((reward) => reward.category == RewardCategories.vip).toList();
+    final specialRewards = rewards.where((reward) => reward.category == RewardCategories.special).toList();
 
     return Scaffold(
       backgroundColor: AppColors.background,
@@ -88,9 +96,14 @@ class _RewardsShopScreenState extends State<RewardsShopScreen> with SingleTicker
         title: const Text('Rewards Shop'),
         bottom: TabBar(
           controller: _tabController,
+          isScrollable: true,
           tabs: const [
             Tab(text: 'All Rewards'),
-            Tab(text: 'Available to Claim'),
+            Tab(text: 'Discounts'),
+            Tab(text: 'Free Jumps'),
+            Tab(text: 'Merchandise'),
+            Tab(text: 'VIP'),
+            Tab(text: 'Special'),
           ],
           indicatorColor: AppColors.white,
           labelColor: AppColors.white,
@@ -150,13 +163,44 @@ class _RewardsShopScreenState extends State<RewardsShopScreen> with SingleTicker
                             : _buildRewardsList(rewards),
                       ),
                       
-                      // Available to claim tab
+                      // Discounts tab
                       RefreshIndicator(
                         onRefresh: _refreshRewards,
-                        child: rewardsUserCanClaim.isEmpty
-                            ? _buildEmptyState(
-                                'You don\'t have enough points to claim any rewards yet. Keep earning points!')
-                            : _buildRewardsList(rewardsUserCanClaim),
+                        child: discountRewards.isEmpty
+                            ? _buildEmptyState('No discount rewards available at the moment.')
+                            : _buildRewardsList(discountRewards),
+                      ),
+                      
+                      // Free Jumps tab
+                      RefreshIndicator(
+                        onRefresh: _refreshRewards,
+                        child: freeJumpRewards.isEmpty
+                            ? _buildEmptyState('No free jump rewards available at the moment.')
+                            : _buildRewardsList(freeJumpRewards),
+                      ),
+                      
+                      // Merchandise tab
+                      RefreshIndicator(
+                        onRefresh: _refreshRewards,
+                        child: merchandiseRewards.isEmpty
+                            ? _buildEmptyState('No merchandise rewards available at the moment.')
+                            : _buildRewardsList(merchandiseRewards),
+                      ),
+                      
+                      // VIP tab
+                      RefreshIndicator(
+                        onRefresh: _refreshRewards,
+                        child: vipRewards.isEmpty
+                            ? _buildEmptyState('No VIP rewards available at the moment.')
+                            : _buildRewardsList(vipRewards),
+                      ),
+                      
+                      // Special tab
+                      RefreshIndicator(
+                        onRefresh: _refreshRewards,
+                        child: specialRewards.isEmpty
+                            ? _buildEmptyState('No special rewards available at the moment.')
+                            : _buildRewardsList(specialRewards),
                       ),
                     ],
                   ),

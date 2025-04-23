@@ -77,6 +77,7 @@ class RewardsService {
             imageUrl: reward.imageUrl,
             expiryDate: reward.expiryDate,
             isActive: reward.isActive,
+            category: reward.category,
             additionalInfo: additionalInfo,
           );
         }

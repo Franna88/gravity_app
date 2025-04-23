@@ -1,4 +1,5 @@
 import 'package:flutter/foundation.dart';
+import 'package:gravity_rewards_app/constants/app_constants.dart';
 import 'package:gravity_rewards_app/models/reward_model.dart';
 import 'package:gravity_rewards_app/services/notification_service.dart';
 
@@ -29,20 +30,25 @@ class RewardsProvider with ChangeNotifier {
     notifyListeners();
   }
   
-  // Get reward category
+  // Get reward category (keeping for backward compatibility)
   String getRewardCategory(String rewardName) {
-    if (rewardName.toLowerCase().contains('jump') || 
-        rewardName.toLowerCase().contains('session') ||
-        rewardName.toLowerCase().contains('party') ||
-        rewardName.toLowerCase().contains('room')) {
-      return 'booking';
-    } else if (rewardName.toLowerCase().contains('discount') || 
-               rewardName.toLowerCase().contains('merch') ||
-               rewardName.toLowerCase().contains('off')) {
-      return 'merchandise';
+    final lowerName = rewardName.toLowerCase();
+    if (lowerName.contains('jump') || lowerName.contains('session')) {
+      return RewardCategories.freeJumps;
+    } else if (lowerName.contains('discount') || lowerName.contains('off') || lowerName.contains('%')) {
+      return RewardCategories.discounts;
+    } else if (lowerName.contains('merch')) {
+      return RewardCategories.merchandise;
+    } else if (lowerName.contains('vip')) {
+      return RewardCategories.vip;
     } else {
-      return 'general';
+      return RewardCategories.special;
     }
+  }
+  
+  // Get rewards by category
+  List<RewardModel> getRewardsByCategory(String category) {
+    return _availableRewards.where((reward) => reward.category == category).toList();
   }
   
   // Mock rewards data
@@ -57,7 +63,8 @@ class RewardsProvider with ChangeNotifier {
         imageUrl: 'https://via.placeholder.com/300x200?text=Free+Jump',
         expiryDate: now.add(const Duration(days: 90)),
         isActive: true,
-        additionalInfo: {'canRedeem': true, 'category': 'booking'},
+        category: RewardCategories.freeJumps,
+        additionalInfo: {'canRedeem': true},
       ),
       RewardModel(
         id: 'reward-2',
@@ -67,7 +74,8 @@ class RewardsProvider with ChangeNotifier {
         imageUrl: 'https://via.placeholder.com/300x200?text=10%+Off',
         expiryDate: now.add(const Duration(days: 60)),
         isActive: true,
-        additionalInfo: {'canRedeem': true, 'category': 'merchandise'},
+        category: RewardCategories.discounts,
+        additionalInfo: {'canRedeem': true},
       ),
       RewardModel(
         id: 'reward-3',
@@ -77,7 +85,8 @@ class RewardsProvider with ChangeNotifier {
         imageUrl: 'https://via.placeholder.com/300x200?text=Party+Room',
         expiryDate: now.add(const Duration(days: 120)),
         isActive: true,
-        additionalInfo: {'canRedeem': true, 'category': 'booking'},
+        category: RewardCategories.discounts,
+        additionalInfo: {'canRedeem': true},
       ),
       RewardModel(
         id: 'reward-4',
@@ -87,7 +96,30 @@ class RewardsProvider with ChangeNotifier {
         imageUrl: 'https://via.placeholder.com/300x200?text=VIP+Pass',
         expiryDate: now.add(const Duration(days: 90)),
         isActive: true,
-        additionalInfo: {'canRedeem': false, 'category': 'booking'},
+        category: RewardCategories.vip,
+        additionalInfo: {'canRedeem': false},
+      ),
+      RewardModel(
+        id: 'reward-5',
+        name: 'Gravity T-Shirt',
+        description: 'Get a free Gravity branded t-shirt in your size.',
+        pointsCost: 200,
+        imageUrl: 'https://via.placeholder.com/300x200?text=Gravity+Shirt',
+        expiryDate: now.add(const Duration(days: 90)),
+        isActive: true,
+        category: RewardCategories.merchandise,
+        additionalInfo: {'canRedeem': true},
+      ),
+      RewardModel(
+        id: 'reward-6',
+        name: 'Special Event Access',
+        description: 'Get exclusive access to our next special event.',
+        pointsCost: 300,
+        imageUrl: 'https://via.placeholder.com/300x200?text=Special+Event',
+        expiryDate: now.add(const Duration(days: 45)),
+        isActive: true,
+        category: RewardCategories.special,
+        additionalInfo: {'canRedeem': false},
       ),
     ];
   }
@@ -138,8 +170,8 @@ class RewardsProvider with ChangeNotifier {
       'imageUrl': reward.imageUrl,
       'expiryDate': reward.expiryDate.toIso8601String(),
       'isActive': reward.isActive,
+      'category': reward.category,
       'canRedeem': reward.additionalInfo?['canRedeem'] ?? false,
-      'category': reward.additionalInfo?['category'] ?? getRewardCategory(reward.name),
     };
     notifyListeners();
   }

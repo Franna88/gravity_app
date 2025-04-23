@@ -96,6 +96,11 @@ class AppAssets {
   static const String logoPath = 'assets/images/Gravity-Logo.png';
   static const String logoSmall = 'assets/images/Gravity-Logo.png';
   static const String placeholderImagePath = 'assets/images/placeholder.png';
+  static const String logo = 'assets/images/logo.png';
+  static const String onboarding1 = 'assets/images/onboarding_1.png';
+  static const String onboarding2 = 'assets/images/onboarding_2.png';
+  static const String onboarding3 = 'assets/images/onboarding_3.png';
+  static const String profilePlaceholder = 'assets/images/profile_placeholder.png';
 }
 
 // Shared Preferences Keys
@@ -137,4 +142,20 @@ class RewardsThresholds {
   static const int merchandise20PercentOff = 350;
   static const int freePartyRoomHour = 500;
   static const int privateSessionDiscount = 750;
+}
+
+class RewardCategories {
+  static const String discounts = 'Discounts';
+  static const String freeJumps = 'Free Jumps';
+  static const String merchandise = 'Merchandise';
+  static const String vip = 'VIP';
+  static const String special = 'Special';
+  
+  static List<String> all = [
+    discounts,
+    freeJumps, 
+    merchandise,
+    vip,
+    special
+  ];
 } 

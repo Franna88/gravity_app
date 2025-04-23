@@ -150,6 +150,27 @@ class _RewardCardState extends State<RewardCard> with SingleTickerProviderStateM
                         ),
                       ),
                       
+                      // Add category badge to the top right
+                      Positioned(
+                        top: 8,
+                        right: 8,
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                          decoration: BoxDecoration(
+                            color: _getCategoryColor(widget.reward.category),
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: Text(
+                            widget.reward.category,
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 12,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                      ),
+                      
                       // Main content
                       Padding(
                         padding: const EdgeInsets.all(16.0),
@@ -335,5 +356,23 @@ class _RewardCardState extends State<RewardCard> with SingleTickerProviderStateM
         ),
       ],
     );
+  }
+  
+  // Add a method to get colors based on category
+  Color _getCategoryColor(String category) {
+    switch (category) {
+      case RewardCategories.discounts:
+        return Colors.purple;
+      case RewardCategories.freeJumps:
+        return Colors.blue;
+      case RewardCategories.merchandise:
+        return Colors.orange;
+      case RewardCategories.vip:
+        return Colors.red;
+      case RewardCategories.special:
+        return Colors.teal;
+      default:
+        return Colors.grey;
+    }
   }
 } 

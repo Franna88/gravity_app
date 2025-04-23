@@ -528,12 +528,25 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                                     
                                     const SizedBox(height: 12),
                                     
-                                    _buildAnimatedButton(
-                                      text: 'My Claimed Rewards',
-                                      icon: Icons.redeem,
-                                      onPressed: _viewClaimedRewards,
-                                      isOutlined: true,
-                                      color: AppColors.accent,
+                                    Container(
+                                      margin: const EdgeInsets.symmetric(vertical: 8),
+                                      decoration: BoxDecoration(
+                                        borderRadius: BorderRadius.circular(12),
+                                        boxShadow: [
+                                          BoxShadow(
+                                            color: AppColors.accent.withOpacity(0.3),
+                                            blurRadius: 8,
+                                            offset: const Offset(0, 3),
+                                          ),
+                                        ],
+                                      ),
+                                      child: _buildAnimatedButton(
+                                        text: 'My Claimed Rewards',
+                                        icon: Icons.card_giftcard,
+                                        onPressed: _viewClaimedRewards,
+                                        isOutlined: false,
+                                        color: AppColors.accent,
+                                      ),
                                     ),
                                   ],
                                 ),

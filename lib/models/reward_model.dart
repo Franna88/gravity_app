@@ -8,6 +8,7 @@ class RewardModel {
   final String? imageUrl;
   final DateTime expiryDate;
   final bool isActive;
+  final String category;
   final Map<String, dynamic>? additionalInfo;
 
   RewardModel({
@@ -18,6 +19,7 @@ class RewardModel {
     this.imageUrl,
     required this.expiryDate,
     required this.isActive,
+    required this.category,
     this.additionalInfo,
   });
 
@@ -30,6 +32,7 @@ class RewardModel {
       imageUrl: json['imageUrl'] as String?,
       expiryDate: DateTime.parse(json['expiryDate']),
       isActive: json['isActive'] as bool,
+      category: json['category'] as String? ?? _getCategoryFromName(json['name'] as String),
       additionalInfo: json['additionalInfo'] as Map<String, dynamic>?,
     );
   }
@@ -43,8 +46,25 @@ class RewardModel {
       'imageUrl': imageUrl,
       'expiryDate': expiryDate.toIso8601String(),
       'isActive': isActive,
+      'category': category,
       'additionalInfo': additionalInfo,
     };
+  }
+
+  // Helper to determine the category from name if not provided
+  static String _getCategoryFromName(String name) {
+    final lowerName = name.toLowerCase();
+    if (lowerName.contains('jump') || lowerName.contains('session')) {
+      return RewardCategories.freeJumps;
+    } else if (lowerName.contains('discount') || lowerName.contains('off') || lowerName.contains('%')) {
+      return RewardCategories.discounts;
+    } else if (lowerName.contains('merch')) {
+      return RewardCategories.merchandise;
+    } else if (lowerName.contains('vip')) {
+      return RewardCategories.vip;
+    } else {
+      return RewardCategories.special;
+    }
   }
 
   // Helper method to check if reward is expired
@@ -68,6 +88,7 @@ class RewardModel {
         imageUrl: 'https://gravitype.co.za/wp-content/uploads/2015/11/open-jump-arena.jpg',
         expiryDate: DateTime.now().add(const Duration(days: 365)),
         isActive: true,
+        category: RewardCategories.freeJumps,
       ),
       RewardModel(
         id: '2',
@@ -77,6 +98,7 @@ class RewardModel {
         imageUrl: 'https://gravitype.co.za/wp-content/uploads/2015/11/kids-group.jpg',
         expiryDate: DateTime.now().add(const Duration(days: 365)),
         isActive: true,
+        category: RewardCategories.discounts,
       ),
       RewardModel(
         id: '3',
@@ -86,6 +108,7 @@ class RewardModel {
         imageUrl: 'https://gravitype.co.za/wp-content/uploads/2015/11/kids-group.jpg',
         expiryDate: DateTime.now().add(const Duration(days: 365)),
         isActive: true,
+        category: RewardCategories.discounts,
       ),
       RewardModel(
         id: '4',
@@ -95,6 +118,7 @@ class RewardModel {
         imageUrl: 'https://gravitype.co.za/wp-content/uploads/2015/11/home-bg.jpg',
         expiryDate: DateTime.now().add(const Duration(days: 365)),
         isActive: true,
+        category: RewardCategories.special,
       ),
       RewardModel(
         id: '5',
@@ -104,6 +128,27 @@ class RewardModel {
         imageUrl: 'https://gravitype.co.za/wp-content/uploads/2015/11/open-jump-arena.jpg',
         expiryDate: DateTime.now().add(const Duration(days: 365)),
         isActive: true,
+        category: RewardCategories.discounts,
+      ),
+      RewardModel(
+        id: '6',
+        name: 'VIP Access Pass',
+        description: 'Get exclusive VIP access to the park for one day',
+        pointsCost: RewardsThresholds.privateSessionDiscount + 100,
+        imageUrl: 'https://gravitype.co.za/wp-content/uploads/2015/11/open-jump-arena.jpg',
+        expiryDate: DateTime.now().add(const Duration(days: 365)),
+        isActive: true,
+        category: RewardCategories.vip,
+      ),
+      RewardModel(
+        id: '7',
+        name: 'Branded Gravity Socks',
+        description: 'Get a pair of Gravity branded jump socks',
+        pointsCost: 150,
+        imageUrl: 'https://gravitype.co.za/wp-content/uploads/2015/11/kids-group.jpg',
+        expiryDate: DateTime.now().add(const Duration(days: 365)),
+        isActive: true,
+        category: RewardCategories.merchandise,
       ),
     ];
   }
