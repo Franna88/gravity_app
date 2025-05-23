@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:gravity_rewards_app/constants/app_constants.dart';
+import 'package:mobile_scanner/mobile_scanner.dart';
 
 class AppTheme {
   static ThemeData getTheme() {
@@ -91,7 +92,7 @@ class AppTheme {
         backgroundColor: AppColors.accent,
         foregroundColor: AppColors.white,
       ),
-      cardTheme: CardTheme(
+      cardTheme: CardThemeData(
         color: AppColors.white,
         elevation: 3,
         shadowColor: AppColors.black.withOpacity(0.2),
@@ -126,7 +127,7 @@ class AppTheme {
         secondaryLabelStyle: const TextStyle(color: AppColors.white),
         brightness: Brightness.light,
       ),
-      tabBarTheme: const TabBarTheme(
+      tabBarTheme: const TabBarThemeData(
         labelColor: AppColors.primary,
         unselectedLabelColor: AppColors.textSecondary,
         indicatorColor: AppColors.primary,
@@ -140,5 +141,75 @@ class AppTheme {
         size: AppDimensions.iconSize,
       ),
     );
+  }
+}
+
+class QRWidget extends StatefulWidget {
+  const QRWidget({
+    Key? key,
+    required this.onClose,
+  }) : super(key: key);
+
+  final Function onClose;
+
+  @override
+  State<StatefulWidget> createState() => _QRWidgetState();
+}
+
+class _QRWidgetState extends State<QRWidget> {
+  MobileScannerController controller = MobileScannerController();
+
+  @override
+  Widget build(BuildContext context) {
+    var scanArea = (MediaQuery.of(context).size.width < 400 ||
+            MediaQuery.of(context).size.height < 400)
+        ? 150.0
+        : 300.0;
+
+    return Scaffold(
+      body: Stack(
+        children: <Widget>[
+          MobileScanner(
+            controller: controller,
+            onDetect: (capture) {
+              final List<Barcode> barcodes = capture.barcodes;
+              for (final barcode in barcodes) {
+                debugPrint('Barcode found! ${barcode.rawValue}');
+              }
+            },
+          ),
+          Container(
+            alignment: Alignment.bottomCenter,
+            padding: const EdgeInsets.only(bottom: 60.0),
+            child: Row(
+              children: <Widget>[
+                Expanded(
+                  child: RawMaterialButton(
+                    onPressed: () {
+                      widget.onClose();
+                    },
+                    elevation: 2.0,
+                    fillColor: Colors.white,
+                    child: const Icon(
+                      Icons.close_sharp,
+                      color: Color(0xff459d44),
+                      size: 40.0,
+                    ),
+                    padding: const EdgeInsets.all(8.0),
+                    shape: const CircleBorder(),
+                  ),
+                ),
+              ],
+            ),
+          )
+        ],
+      ),
+    );
+  }
+
+  @override
+  void dispose() {
+    controller.dispose();
+    super.dispose();
   }
 } 

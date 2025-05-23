@@ -204,6 +204,13 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     );
   }
 
+  void _viewFoodService() {
+    _animateButton();
+    Future.delayed(const Duration(milliseconds: 200), () {
+      Navigator.pushNamed(context, '/food_service');
+    });
+  }
+
   void _viewRewardDetails(RewardModel reward) {
     final rewardsProvider = Provider.of<RewardsProvider>(context, listen: false);
     rewardsProvider.selectReward(reward);
@@ -534,7 +541,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                                         borderRadius: BorderRadius.circular(12),
                                         boxShadow: [
                                           BoxShadow(
-                                            color: AppColors.accent.withOpacity(0.3),
+                                            color: Colors.orange.withOpacity(0.3),
                                             blurRadius: 8,
                                             offset: const Offset(0, 3),
                                           ),
@@ -546,6 +553,29 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                                         onPressed: _viewClaimedRewards,
                                         isOutlined: false,
                                         color: AppColors.accent,
+                                      ),
+                                    ),
+                                    
+                                    const SizedBox(height: 12),
+                                    
+                                    Container(
+                                      margin: const EdgeInsets.symmetric(vertical: 8),
+                                      decoration: BoxDecoration(
+                                        borderRadius: BorderRadius.circular(12),
+                                        boxShadow: [
+                                          BoxShadow(
+                                            color: Colors.orange.withOpacity(0.3),
+                                            blurRadius: 8,
+                                            offset: const Offset(0, 3),
+                                          ),
+                                        ],
+                                      ),
+                                      child: _buildAnimatedButton(
+                                        text: 'Order Food & Drinks',
+                                        icon: Icons.restaurant_menu,
+                                        onPressed: _viewFoodService,
+                                        isOutlined: false,
+                                        color: Colors.orange,
                                       ),
                                     ),
                                   ],
@@ -719,8 +749,6 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
             icon: icon,
             onPressed: onPressed,
             isOutlined: isOutlined,
-            backgroundColor: isOutlined ? Colors.transparent : color,
-            textColor: isOutlined ? color : Colors.white,
           ),
         );
       },

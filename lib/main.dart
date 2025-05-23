@@ -3,8 +3,10 @@ import 'package:gravity_rewards_app/constants/app_constants.dart';
 import 'package:gravity_rewards_app/constants/app_theme.dart';
 import 'package:gravity_rewards_app/providers/activity_provider.dart';
 import 'package:gravity_rewards_app/providers/auth_provider.dart';
+import 'package:gravity_rewards_app/providers/food_service_provider.dart';
 import 'package:gravity_rewards_app/providers/rewards_provider.dart';
 import 'package:gravity_rewards_app/screens/claimed_rewards_screen.dart';
+import 'package:gravity_rewards_app/screens/food_service_screen.dart';
 import 'package:gravity_rewards_app/screens/home_screen.dart';
 import 'package:gravity_rewards_app/screens/login_screen.dart';
 import 'package:gravity_rewards_app/screens/profile_screen.dart';
@@ -32,6 +34,7 @@ class MyApp extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => AuthProvider()),
         ChangeNotifierProvider(create: (_) => RewardsProvider()),
         ChangeNotifierProvider(create: (_) => ActivityProvider()),
+        ChangeNotifierProvider(create: (_) => FoodServiceProvider()),
       ],
       child: MaterialApp(
         title: 'Gravity Rewards',
@@ -44,6 +47,7 @@ class MyApp extends StatelessWidget {
           AppRoutes.home: (context) => const HomeScreen(),
           AppRoutes.profile: (context) => const ProfileScreen(),
           AppRoutes.claimedRewards: (context) => const ClaimedRewardsScreen(),
+          '/food_service': (context) => const FoodServiceScreen(),
         },
       ),
     );

@@ -11,12 +11,36 @@ class RewardsProvider with ChangeNotifier {
   List<Map<String, dynamic>> _redemptionHistory = [];
   bool _isLoading = false;
   String? _error;
+  int _userPoints = 250; // Default mock value for user points
   
   List<RewardModel> get availableRewards => _availableRewards;
   Map<String, dynamic>? get selectedReward => _selectedReward;
   List<Map<String, dynamic>> get redemptionHistory => _redemptionHistory;
   bool get isLoading => _isLoading;
   String? get error => _error;
+  int get userPoints => _userPoints;
+  
+  // Set user points
+  void setUserPoints(int points) {
+    _userPoints = points;
+    notifyListeners();
+  }
+  
+  // Add points to user
+  void addPoints(int points) {
+    _userPoints += points;
+    notifyListeners();
+  }
+  
+  // Deduct points from user
+  bool deductPoints(int points) {
+    if (_userPoints >= points) {
+      _userPoints -= points;
+      notifyListeners();
+      return true;
+    }
+    return false;
+  }
   
   // Helper to set loading state
   void setLoading(bool loading) {
